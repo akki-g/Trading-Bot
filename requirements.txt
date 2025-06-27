@@ -2,6 +2,8 @@ yfinance
 Pandas
 NumPy
 Pandas
-Scikit-learn
+scikit-learn 
 Backtrader
 matplotlib
+torch
+gymnasium
