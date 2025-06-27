@@ -1,23 +1,11 @@
-import yfinance as yf
+#!/usr/bin/env python3
 import pandas as pd
 
-tickers = ['LUMN']
+# 1) Load the master CSV
+df = pd.read_csv("fx_data_5y_daily_1y_1min.csv", parse_dates=["datetime"])
 
-def get_data(tickers):
-    # Download full historical data for the tickers
-    data = yf.download(tickers, start="1900-01-01")  # Adjust start date if needed
-
-    # Display the first few rows of the data
-    print(data.head())
-    print(data.columns)
-    print(data.shape)
-    return data
-
-
-# Download full historical data for the tickers
-data = yf.download(tickers, start="1900-01-01")  # Adjust start date if needed
-
-# Display the first few rows of the data
-print(data.head())
-print(data.columns)
-print(data.shape)
+# 2) Group by the 'symbol' column and write each group to its own CSV
+for symbol, group in df.groupby("symbol"):
+    out_name = f"fx_data_{symbol}.csv"
+    group.to_csv(out_name, index=False)
+    print(f"Wrote {len(group)} rows to {out_name}")
