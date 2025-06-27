@@ -125,7 +125,7 @@ class ForexSystemSetup:
                 host=self.config['DB_HOST'],
                 port=self.config['DB_PORT'],
                 database='postgres',
-                user='postgres',
+                user='akshatguduru',
                 password=admin_password
             ) as conn:
                 conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)

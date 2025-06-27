@@ -18,8 +18,6 @@ class ForexConfig:
     
     # API Configuration
     ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
-    OANDA_API_KEY = os.getenv('OANDA_API_KEY')
-    OANDA_ACCOUNT_ID = os.getenv('OANDA_ACCOUNT_ID')
     
     # Major Forex Pairs
     MAJOR_PAIRS = [
@@ -87,14 +85,6 @@ API_ENDPOINTS = {
             'daily': 'FX_DAILY',
             'weekly': 'FX_WEEKLY',
             'monthly': 'FX_MONTHLY'
-        }
-    },
-    'oanda': {
-        'base_url': 'https://api-fxtrade.oanda.com/v3',
-        'rate_limit': 120,  # requests per minute
-        'endpoints': {
-            'instruments': '/instruments',
-            'candles': '/instruments/{instrument}/candles'
         }
     }
 }

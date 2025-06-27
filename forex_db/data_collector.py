@@ -66,9 +66,25 @@ class ForexDataCollector:
             
             # Convert to our standard format
             formatted_data = []
-            for timestamp, values in data.items():
+            for timestamp_str, values in data.items():
+                # Handle different timestamp formats
+                try:
+                    if interval == 'daily':
+                        # Daily data format: '2025-06-27'
+                        timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d')
+                    else:
+                        # Intraday data format: '2025-06-27 09:30:00'
+                        timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                except ValueError:
+                    # Try alternative format
+                    try:
+                        timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d')
+                    except ValueError:
+                        logger.warning(f"Could not parse timestamp: {timestamp_str}")
+                        continue
+                
                 formatted_data.append({
-                    'timestamp': datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S'),
+                    'timestamp': timestamp,
                     'pair': pair,
                     'open': float(values['1. open']),
                     'high': float(values['2. high']),
@@ -88,8 +104,8 @@ class ForexDataCollector:
             raise
     
     def get_historical_data_yfinance(self, pair: str, 
-                                   period: str = '1y',
-                                   interval: str = '1m') -> List[Dict]:
+                                   period: str = '5y',
+                                   interval: str = '1d') -> List[Dict]:
         """Get historical data from Yahoo Finance (limited forex support)."""
         try:
             # Convert pair format for Yahoo Finance (EURUSD -> EURUSD=X)
@@ -127,60 +143,6 @@ class ForexDataCollector:
             
         except Exception as e:
             logger.error(f"Yahoo Finance API error for {pair}: {e}")
-            return []
-    
-    async def get_historical_data_oanda(self, pair: str, 
-                                      granularity: str = 'M1',
-                                      count: int = 5000) -> List[Dict]:
-        """Get historical data from OANDA API."""
-        if not self.config.OANDA_API_KEY:
-            raise ValueError("OANDA API key not configured")
-        
-        try:
-            # Convert pair format (EURUSD -> EUR_USD)
-            oanda_pair = f"{pair[:3]}_{pair[3:]}"
-            
-            headers = {
-                'Authorization': f'Bearer {self.config.OANDA_API_KEY}',
-                'Content-Type': 'application/json'
-            }
-            
-            params = {
-                'granularity': granularity,
-                'count': count
-            }
-            
-            url = f"{API_ENDPOINTS['oanda']['base_url']}/instruments/{oanda_pair}/candles"
-            
-            async with self.session.get(url, headers=headers, params=params) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    
-                    formatted_data = []
-                    for candle in data.get('candles', []):
-                        if candle.get('complete'):
-                            mid = candle['mid']
-                            formatted_data.append({
-                                'timestamp': datetime.fromisoformat(candle['time'].replace('Z', '+00:00')),
-                                'pair': pair,
-                                'open': float(mid['o']),
-                                'high': float(mid['h']),
-                                'low': float(mid['l']),
-                                'close': float(mid['c']),
-                                'volume': int(candle.get('volume', 0)),
-                                'spread': None,  # Could calculate from bid/ask if available
-                                'tick_volume': int(candle.get('volume', 0)),
-                                'source': 'oanda'
-                            })
-                    
-                    logger.info(f"Retrieved {len(formatted_data)} records from OANDA for {pair}")
-                    return formatted_data
-                else:
-                    logger.error(f"OANDA API error {response.status} for {pair}")
-                    return []
-                    
-        except Exception as e:
-            logger.error(f"OANDA API error for {pair}: {e}")
             return []
     
     def get_forex_data_with_fallback(self, pair: str, 
@@ -222,20 +184,6 @@ class ForexDataCollector:
     async def get_real_time_data(self, pairs: List[str]) -> List[Dict]:
         """Get real-time data for multiple pairs."""
         real_time_data = []
-        
-        # Use OANDA for real-time data if available
-        if self.config.OANDA_API_KEY:
-            for pair in pairs:
-                try:
-                    data = await self.get_historical_data_oanda(pair, 'M1', 1)
-                    if data:
-                        real_time_data.extend(data)
-                    
-                    # Rate limiting
-                    await asyncio.sleep(0.5)
-                    
-                except Exception as e:
-                    logger.error(f"Real-time data error for {pair}: {e}")
         
         # Fallback to Yahoo Finance for real-time quotes
         if not real_time_data:

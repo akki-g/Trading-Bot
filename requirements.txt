@@ -1,9 +1,0 @@
-yfinance 
-Pandas
-NumPy
-Pandas
-scikit-learn 
-Backtrader
-matplotlib
-torch
-gymnasium
