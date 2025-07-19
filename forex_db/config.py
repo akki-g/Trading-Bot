@@ -21,10 +21,7 @@ class ForexConfig:
     
     # Major Forex Pairs
     MAJOR_PAIRS = [
-        'EURUSD', 'GBPUSD', 'USDJPY', 'USDCHF', 
-        'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP',
-        'EURJPY', 'GBPJPY', 'CHFJPY', 'EURCHF',
-        'AUDCHF', 'GBPCHF', 'CADCHF', 'NZDCHF'
+        'AUDUSD', 'EURUSD', 'GBPUSD', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY'
     ]
     
     # Data Configuration

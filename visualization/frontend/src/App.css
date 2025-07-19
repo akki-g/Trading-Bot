@@ -1,0 +1,23 @@
+.App {
+  text-align: left;
+}
+
+.App h1 {
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.view-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.view-selector .button.active {
+  background-color: #28a745;
+}
+
+.view-selector .button.active:hover {
+  background-color: #218838;
+}
